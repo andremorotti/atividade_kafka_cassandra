@@ -108,7 +108,7 @@ Estas instruções assumem um sistema operacional Linux/macOS. Os comandos podem
 
 1.  **Clone the Repository:**
     ```bash
-    git clone https://github.com/andremorotti/atividade_kafka.git
+    git clone https://github.com/andremorotti/atividade_kafka_cassandra.git
     cd your_repository
     ```
 
