@@ -1,28 +1,35 @@
-# E-commerce Sales Simulation with Kafka and PySpark / Simulação de Vendas de E-commerce com Kafka e PySpark
+# E-commerce Sales Simulation with Kafka, PySpark and Cassandra / Simulação de Vendas de E-commerce com Kafka, PySpark e Cassandra
 
 ## Steps / Etapas
 
-1.  **Setting up Apache Kafka:** Installing and configuring the Kafka environment in KRaft mode and creating a topic for sales messages.  
-    **Configuração do Apache Kafka:** Instalação e configuração do ambiente Kafka no modo KRaft e criação de um tópico para as mensagens de vendas.
-3.  **Creating a Python Message Producer:** Developing a producer that sends simulated sales data messages to Kafka. 
-    **Criação de um Produtor de Mensagens em Python:** Desenvolvimento de um produtor que envia mensagens de dados de vendas simulados para o Kafka.
-5.  **Creating a Message Consumer in PySpark:** Developing a PySpark consumer that reads messages from Kafka, processes the data, and displays the total sales grouped by product. 
-    **Criação de um Consumidor de Mensagens em PySpark:** Desenvolvimento de um consumidor em PySpark que lê mensagens do Kafka, processa os dados e exibe o valor total das vendas agrupado por produto.
+1. **Setting up Apache Kafka:** Installing and configuring the Kafka environment in KRaft mode and creating a topic for sales messages.  
+   **Configuração do Apache Kafka:** Instalação e configuração do ambiente Kafka no modo KRaft e criação de um tópico para as mensagens de vendas.
 
+2. **Creating a Python Message Producer:** Developing a producer that sends simulated sales data messages to Kafka.  
+   **Criação de um Produtor de Mensagens em Python:** Desenvolvimento de um produtor que envia mensagens de dados de vendas simulados para o Kafka.
+
+3. **Creating a Message Consumer in PySpark:** Developing a PySpark consumer that reads messages from Kafka, processes the data, and displays the total sales grouped by product.  
+   **Criação de um Consumidor de Mensagens em PySpark:** Desenvolvimento de um consumidor em PySpark que lê mensagens do Kafka, processa os dados e exibe o valor total das vendas agrupado por produto.
+
+4. **Storing Aggregated Data in Cassandra:** Saving the aggregated sales data by product into a Cassandra table for persistent storage and querying.  
+   **Armazenamento dos Dados Agregados no Cassandra:** Salvando os dados agregados de vendas por produto em uma tabela Cassandra para armazenamento persistente e consultas.
+   
 ## Technologies Used / Tecnologias Utilizadas
 
-* Python: Version 3.x (recommended) / Versão 3.x (recomendado)
-* PySpark: Version 3.5.5
-* Apache Kafka: Version 4.0.0 (KRaft mode)
-* kafka-python: For the Python producer / Para o produtor Python
-* Faker: For simulated sales data generation / Para geração de dados de vendas simulados
+- Python: Version 3.x (recommended) / Versão 3.x (recomendado)
+- PySpark: Version 3.5.5
+- Apache Kafka: Version 4.0.0 (KRaft mode)
+- kafka-python: For the Python producer / Para o produtor Python
+- Faker: For simulated sales data generation / Para geração de dados de vendas simulados
+- Apache Cassandra: Version 4.x / Para armazenamento de dados agregados
 
 ## Prerequisites / Pré-requisitos
 
-* **Java Development Kit (JDK):** Kafka is written in Java and requires the JDK installed. / O Kafka é escrito em Java e requer o JDK instalado.
-* **Apache Kafka:** Necessary for the message broker. / Necessário para o broker de mensagens.
-* **Python and Pip:** Necessary to run the producer and consumer scripts. / Necessários para executar os scripts do produtor e do consumidor.
-* **PySpark:** Necessary for processing the data stream from Kafka. / Necessário para o processamento do fluxo de dados do Kafka.
+- **Java Development Kit (JDK):** Kafka is written in Java and requires the JDK installed. / O Kafka é escrito em Java e requer o JDK instalado.
+- **Apache Kafka:** Necessary for the message broker. / Necessário para o broker de mensagens.
+- **Python and Pip:** Necessary to run the producer and consumer scripts. / Necessários para executar os scripts do produtor e do consumidor.
+- **PySpark:** Necessary for processing the data stream from Kafka. / Necessário para o processamento do fluxo de dados do Kafka.
+- **Apache Cassandra:** Necessary for storing aggregated data. / Necessário para armazenar os dados agregados.
 
 ## Installation and Configuration / Instalação e Configuração
 
@@ -73,8 +80,31 @@ Estas instruções assumem um sistema operacional Linux/macOS. Os comandos podem
     ```bash
     kafka-topics.sh --create --topic vendas-ecommerce --bootstrap-server localhost:9092 --partitions 1 --replication-factor 1
     ```
+### 2. Setting up Cassandra / Configuração do Cassandra
 
-### 2. Project Environment Setup / Configuração do Ambiente do Projeto
+1. **Download and Install Apache Cassandra:**  
+   Follow instructions at [https://cassandra.apache.org/_/quickstart.html](https://cassandra.apache.org/_/quickstart.html).
+
+2. **Start Cassandra Server:**  
+   ```bash
+   cassandra -f
+   ```
+
+3. **Connect to Cassandra Shell:**  
+   ```bash
+   cqlsh
+   ```
+
+4. **Create Keyspace and Table:**  
+   ```sql
+   CREATE KEYSPACE atividade_cassandra WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1};
+
+   CREATE TABLE atividade_cassandra.vendas_por_produto (
+       nome_produto text PRIMARY KEY,
+       valor_total double
+   );
+   ```
+### 3. Project Environment Setup / Configuração do Ambiente do Projeto
 
 1.  **Clone the Repository:**
     ```bash
@@ -95,7 +125,7 @@ Estas instruções assumem um sistema operacional Linux/macOS. Os comandos podem
     pip install -r requirements.txt
     ```
 
-### 3. Running the Scripts / Execução dos Scripts
+### 4. Running the Scripts / Execução dos Scripts
 
 1.  **Run the Message Producer:** Open a new terminal window, navigate to your project directory, and run the Python producer script:
     **Execute o Produtor de Mensagens:** Abra uma nova janela do terminal, navegue até o diretório do seu projeto e execute o script do produtor Python:
@@ -106,12 +136,26 @@ Estas instruções assumem um sistema operacional Linux/macOS. Os comandos podem
 2.  **Run the Consumer with PySpark:** Open a new terminal window, navigate to your project directory, and run the PySpark consumer script, including the Kafka connector:
     **Execute o Consumidor com PySpark:** Abra uma nova janela do terminal, navegue até o diretório do seu projeto e execute o script do consumidor PySpark, incluindo o conector Kafka:
     ```bash
-    spark-submit --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.5 consumer.py
+    spark-submit --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.5,com.datastax.spark:spark-cassandra-connector_2.12:3.5.0 consumer.py
     ```
     *(Ensure the Spark version matches yours)*
     *(Certifique-se de que a versão do Spark corresponda à sua)*
+    
+### 5. Storing Aggregated Results in Cassandra / Armazenando os Resultados Agregados no Cassandra
 
-### 4. Stopping the Processes / Interrompendo os Processos
+After processing the data in PySpark, the script inserts the aggregated total sales by product into the Cassandra table `vendas_por_produto` under the keyspace `atividade_cassandra`.
+
+Após o processamento dos dados no PySpark, o script insere o total agregado de vendas por produto na tabela `vendas_por_produto` dentro do keyspace `atividade_cassandra`.
+
+### 6. Querying Cassandra / Consultando o Cassandra
+
+Use `cqlsh` to query the stored aggregated results:
+
+```sql
+SELECT * FROM atividade_cassandra.vendas_por_produto;
+```
+
+### 7. Stopping the Processes / Interrompendo os Processos
 
 To stop any Kafka service (Server, Producer, or Consumer), press `Ctrl + C` in the corresponding terminal window.
 
